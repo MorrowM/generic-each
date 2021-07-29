@@ -40,6 +40,9 @@ instance (GEach s a, GEach s' a) => GEach (s :+: s') a where
   geach f (L1 s) = L1 <$> geach f s
   geach f (R1 s) = R1 <$> geach f s
 
+instance GEachOf U1 a where
+  geachOf f U1 = pure U1
+
 instance GEachOf (K1 _1 a) a where
   geachOf f (K1 a) = K1 <$> f a
 
