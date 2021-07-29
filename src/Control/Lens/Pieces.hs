@@ -6,6 +6,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE EmptyCase #-}
 module Control.Lens.Pieces ( pieces, piecesOf ) where
 
 import GHC.Generics as G
@@ -39,6 +40,9 @@ class GEachOf s a where
 instance (GEach s a, GEach s' a) => GEach (s :+: s') a where
   geach f (L1 s) = L1 <$> geach f s
   geach f (R1 s) = R1 <$> geach f s
+
+instance GEachOf V1 a where
+  geachOf f v = case v of
 
 instance GEachOf U1 a where
   geachOf f U1 = pure U1
