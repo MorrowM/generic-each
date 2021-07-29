@@ -36,6 +36,10 @@ pieces = genericEach
 class GEachOf s a where
   geachOf :: Applicative f => (a -> f a) -> s x -> f (s x)
 
+instance (GEach s a, GEach s' a) => GEach (s :+: s') a where
+  geach f (L1 s) = L1 <$> geach f s
+  geach f (R1 s) = R1 <$> geach f s
+
 instance GEachOf (K1 _1 a) a where
   geachOf f (K1 a) = K1 <$> f a
 
@@ -44,6 +48,10 @@ instance {-# OVERLAPPABLE #-} GEachOf (K1 _1 b) a where
 
 instance (GEachOf s a, GEachOf s' a) => GEachOf (s :*: s') a where
   geachOf f (s :*: s') = (:*:) <$> geachOf f s <*> geachOf f s'
+
+instance (GEachOf s a, GEachOf s' a) => GEachOf (s :+: s') a where
+  geachOf f (L1 s) = L1 <$> geachOf f s
+  geachOf f (R1 s) = R1 <$> geachOf f s
 
 instance GEachOf s a => GEachOf (M1 _x _y s) a where
   geachOf f (M1 s) = M1 <$> geachOf f s
