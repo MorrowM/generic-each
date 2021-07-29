@@ -63,16 +63,16 @@ instance (GEach s a, GEach s' a) => GEach (s :+: s') a where
   geach f (R1 s) = R1 <$> geach f s
 
 instance GEachOf V1 a where
-  geachOf f v = case v of
+  geachOf _f v = case v of
 
 instance GEachOf U1 a where
-  geachOf f U1 = pure U1
+  geachOf _f U1 = pure U1
 
 instance GEachOf (K1 _1 a) a where
   geachOf f (K1 a) = K1 <$> f a
 
 instance {-# OVERLAPPABLE #-} GEachOf (K1 _1 b) a where
-  geachOf f = pure
+  geachOf _f = pure
 
 instance (GEachOf s a, GEachOf s' a) => GEachOf (s :*: s') a where
   geachOf f (s :*: s') = (:*:) <$> geachOf f s <*> geachOf f s'
