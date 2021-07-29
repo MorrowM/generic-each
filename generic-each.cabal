@@ -1,0 +1,18 @@
+cabal-version: 2.4
+name:          generic-each
+version:       0.1.0.0
+synopsis:      Traverse pieces of data
+description:   Provides traversals for any type with a Generic instance.
+bug-reports:   https://github.com/morrowm/generic-each/issues
+license:       BSD-3-Clause
+license-file:  license
+homepage:      https://github.com/morrowm/generic-each
+author:        Morrow
+maintainer:    themorrowm@gmail.com
+category:      Generics, Lens
+
+library
+  exposed-modules:  Control.Lens.Pieces
+  build-depends:    base ^>=4.14.1.0
+  hs-source-dirs:   src
+  default-language: Haskell2010
