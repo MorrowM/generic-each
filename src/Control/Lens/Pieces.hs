@@ -7,14 +7,30 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE EmptyCase #-}
-module Control.Lens.Pieces ( pieces, piecesOf ) where
+-- | Generic traversals on the fly using "GHC.Generics".
+module Control.Lens.Pieces 
+  ( -- * Types
+    Traversal
+  , Traversal'
+    -- * Traversals 
+  , pieces
+  , piecesOf
+  , piecesOf' 
+    -- * Type Classes
+  , GEach(..)
+  , GEachOf(..)
+  ) where
 
-import GHC.Generics as G
+import GHC.Generics
 
+-- | A Van Laarhoven-style traversal.
 type Traversal s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
+-- | A simple 'Traversal'.
 type Traversal' s a = Traversal s s a a 
 
+-- | Generate a 'Traversal' for any homogenous type.
 class GEach s a | s -> a where
+  -- | Traverse the representation of @s@.
   geach :: Applicative f => (a -> f a) -> s x -> f (s x)
 
 instance GEach (K1 _1 a) a where
@@ -27,14 +43,19 @@ instance GEach s a => GEach (M1 _x _y s) a where
   geach f (M1 s) = M1 <$> geach f s
 
 genericEach :: (Generic s, GEach (Rep s) a) => Traversal' s a
-genericEach f s = G.to <$> geach f (G.from s)
+genericEach f s = to <$> geach f (from s)
 
 -- | A 'Traversal' that traverses all the components of a type, as long as all the components have the same type.
 -- For a more general traversal, use 'piecesOf'.
+--
+-- >>> ('a','b','c') & pieces %~ toUpper
+-- ('A','B','C')
 pieces :: (Generic s, GEach (Rep s) a) => Traversal' s a
 pieces = genericEach
 
+-- | Generate many 'Traversal's for any type.
 class GEachOf s a where
+  -- | Traverse the representation of @s@.
   geachOf :: Applicative f => (a -> f a) -> s x -> f (s x)
 
 instance (GEach s a, GEach s' a) => GEach (s :+: s') a where
@@ -64,12 +85,15 @@ instance GEachOf s a => GEachOf (M1 _x _y s) a where
   geachOf f (M1 s) = M1 <$> geachOf f s
 
 genericEachOf :: (Generic s, GEachOf (Rep s) a) => Traversal' s a
-genericEachOf f s = G.to <$> geachOf f (G.from s)
+genericEachOf f s = to <$> geachOf f (from s)
 
 -- | Like 'piecesOf', but uses a proxy argument instead of TypeApplications.
 piecesOf' :: (Generic s, GEachOf (Rep s) a) => proxy a -> Traversal' s a
 piecesOf' _ = genericEachOf
 
 -- | Traverse all the components of a given type.
+-- 
+-- >>> ('a','b','c',True,"hello") & piecesOf @Char %~ toUpper
+-- ('A','B','C',True,"hello")
 piecesOf :: forall a s. (Generic s, GEachOf (Rep s) a) => Traversal' s a
 piecesOf = genericEachOf
